@@ -1,21 +1,316 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Fusi Bubu Memories</title>
+<meta charset="UTF-8">
+<title>Birthday Surprise</title>
+<style>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#ff7aa2,#ff3d6e);color:white;text-align:center;overflow:hidden}
+#stage{width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;flex-direction:column;position:relative}
+
+/* 3D BALLOONS */
+.balloon{
+position:absolute;
+width:70px;
+height:90px;
+border-radius:50% 50% 45% 45%;
+cursor:pointer;
+background:radial-gradient(circle at 30% 30%,#ffffff55,transparent 40%), var(--color);
+box-shadow:0 20px 40px rgba(0,0,0,.35);
+transform:perspective(800px) rotateX(10deg);
+animation:balloonFloat 8s linear forwards;
+}
+
+.balloon:after{
+content:"";
+position:absolute;
+width:2px;
+height:50px;
+background:white;
+bottom:-50px;
+left:50%;
+}
+
+@keyframes balloonFloat{
+0%{transform:translateY(100vh) translateX(0) perspective(800px) rotateX(10deg)}
+25%{transform:translateY(70vh) translateX(40px) perspective(800px) rotateX(10deg)}
+50%{transform:translateY(40vh) translateX(-40px) perspective(800px) rotateX(10deg)}
+75%{transform:translateY(10vh) translateX(30px) perspective(800px) rotateX(10deg)}
+100%{transform:translateY(-120px) translateX(-20px) perspective(800px) rotateX(10deg)}
+}
+
+.tapNote{position:absolute;top:30px;font-size:22px;font-weight:bold;text-shadow:0 4px 10px rgba(0,0,0,.4)}
+
+/* 3D ENVELOPES */
+.envelopeBox{display:flex;gap:60px;margin-top:30px}
+
+.envelope{
+width:150px;
+height:100px;
+background:#fff;
+color:#333;
+border-radius:10px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+transform:perspective(800px) rotateX(18deg);
+box-shadow:0 20px 35px rgba(0,0,0,.4);
+transition:.2s;
+}
+
+.envelope:hover{transform:perspective(800px) rotateX(18deg) scale(1.1)}
+
+/* BUTTONS */
+.option3d{
+padding:14px 28px;
+font-size:18px;
+border:none;
+border-radius:12px;
+background:#ff4d6d;
+color:white;
+cursor:pointer;
+transform:perspective(600px) rotateX(10deg);
+box-shadow:0 10px 20px rgba(0,0,0,.3);
+margin:10px;
+position:relative
+}
+
+/* POPUP */
+.popup3d{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%) perspective(700px) rotateX(10deg);
+background:#ff4d6d;
+color:white;
+padding:30px;
+border-radius:20px;
+font-size:20px;
+text-align:center;
+box-shadow:0 20px 40px rgba(0,0,0,.4);
+z-index:9999;
+max-width:300px
+}
+
+#quizBox{max-width:400px}
+</style>
 </head>
 
-<body style="text-align:center; background-color:pink;">
+<body>
+<div id="stage"></div>
 
-<h1>FUSI ❤️ BUBU</h1>
-<p>Our Beautiful Memories</p>
+<script>
+const stage=document.getElementById("stage")
 
-<img src="photo1.jpg" width="300">
-<br><br>
+/* BALLOON PAGE */
+let popped=0
+const total=30
 
-<img src="photo2.jpg" width="300">
-<br><br>
+const note=document.createElement("div")
+note.className="tapNote"
+note.innerText="Tap balloons to burst 🎈"
+stage.appendChild(note)
 
-<img src="photo3.jpg" width="300">
+function createBalloon(){
+const b=document.createElement("div")
+b.className="balloon"
+b.style.left=Math.random()*90+"vw"
+b.style.setProperty("--color","hsl("+(Math.random()*360)+",80%,60%)")
 
+b.onclick=function(){
+if(!b.popped){
+b.popped=true
+b.remove()
+popped++
+if(popped===total)showEnvelopes()
+}
+}
+
+stage.appendChild(b)
+}
+
+for(let i=0;i<total;i++)setTimeout(createBalloon,i*250)
+
+/* ENVELOPE PAGE */
+function showEnvelopes(){
+stage.innerHTML="<h2>Open 1 envelope for the surprise</h2>"
+
+const box=document.createElement("div")
+box.className="envelopeBox"
+
+const e1=document.createElement("div")
+const e2=document.createElement("div")
+
+e1.className="envelope"
+e2.className="envelope"
+
+e1.innerText="OPEN"
+e2.innerText="OPEN"
+
+box.appendChild(e1)
+box.appendChild(e2)
+stage.appendChild(box)
+
+let firstClick=true
+
+function handleClick(){
+
+if(firstClick){
+firstClick=false
+showPopup("So sorry... Better luck next time!<br><br>You have one more chance.")
+return
+}
+
+showQuizIntro()
+
+}
+
+e1.onclick=handleClick
+
+e2.onclick=handleClick
+}
+
+/* POPUP */
+function showPopup(text){
+const p=document.createElement("div")
+p.className="popup3d"
+p.innerHTML=text
+
+document.body.appendChild(p)
+
+setTimeout(()=>p.remove(),2500)
+}
+
+/* QUIZ INTRO */
+function showQuizIntro(){
+stage.innerHTML="<div id='quizBox'><h2>It's Your 3rd Birthday With Me</h2><p>Give 3 correct answers to win your prize</p><button class='option3d' id='startQuiz'>LET'S START</button></div>"
+
+document.getElementById("startQuiz").onclick=question1
+}
+
+/* QUESTION 1 */
+function question1(){
+stage.innerHTML="<div id='quizBox'><h2>Do you love your husband?</h2><button class='option3d' id='yes1'>YES</button><button class='option3d' id='no1'>NO</button></div>"
+
+const no=document.getElementById("no1")
+
+setInterval(()=>{
+no.style.left=Math.random()*200+"px"
+no.style.top=Math.random()*100+"px"
+},500)
+
+document.getElementById("yes1").onclick=question2
+}
+
+/* QUESTION 2 */
+function question2(){
+stage.innerHTML="<div id='quizBox'><h2>What will you choose?</h2><button class='option3d' id='gym'>Handsome Gym Guy</button><button class='option3d' id='husband'>Your Husband</button></div>"
+
+const husband=document.getElementById("husband")
+
+setInterval(()=>{
+husband.style.left=Math.random()*200+"px"
+husband.style.top=Math.random()*100+"px"
+},600)
+
+const gym=document.getElementById("gym")
+
+gym.onclick=function(){
+showPopup("You are married 😄<br>Please choose YOUR HUSBAND")
+}
+
+husband.onclick=question3
+}
+
+/* QUESTION 3 */
+function question3(){
+stage.innerHTML="<div id='quizBox'><h2>Will you come on this Sunday?</h2><button class='option3d' id='yes3'>YES</button><button class='option3d' id='no3'>NO</button></div>"
+
+const no=document.getElementById("no3")
+
+setInterval(()=>{
+no.style.left=Math.random()*200+"px"
+no.style.top=Math.random()*100+"px"
+},600)
+
+no.onclick=function(){
+const p=document.createElement("div")
+p.className="popup3d"
+p.innerHTML="I know you will not come.<br>Take care and stay safe."
+
+document.body.appendChild(p)
+
+setTimeout(()=>{
+p.innerHTML="Let's find out our best memories of the last 3 years ❤️<br><br><button class='option3d' id='continueBtn'>CONTINUE</button>"
+
+document.getElementById("continueBtn").onclick=function(){
+p.remove()
+showMemories()
+}
+
+},3000)
+}
+}
+
+/* MEMORIES */
+function showMemories(){
+
+stage.innerHTML = `
+<div id="album" style="display:flex;flex-direction:column;align-items:center;gap:20px">
+
+<img id="albumPhoto" src="photo1.jpg" 
+style="width:280px;height:360px;object-fit:cover;border-radius:20px;box-shadow:0 25px 50px rgba(0,0,0,.45);transform:perspective(900px) rotateX(6deg)">
+
+<div id="albumMessage" class="popup3d" style="position:relative;top:auto;left:auto;transform:perspective(700px) rotateX(10deg);max-width:320px">
+STARTING OF OUR JOURNEY; HONEYMOON PHASE......
+</div>
+
+<button id="albumNext" class="option3d">NEXT</button>
+
+</div>
+`;
+
+let step = 1;
+
+const photo = document.getElementById("albumPhoto");
+const message = document.getElementById("albumMessage");
+const next = document.getElementById("albumNext");
+
+next.onclick = function(){
+
+step++;
+
+if(step === 2){
+
+photo.src = "photo2.jpg";
+
+message.innerText = "MOST DIFFICULT PHASE WHERE EVERYONE LEFT, WE CHOSE EACH OTHER AND STAYED....";
+
+}
+
+else if(step === 3){
+
+photo.src = "photo3.jpg";
+
+message.innerText = "HATTRICK OF BIRTHDAY WITH ME. I WISH WE WILL BE THE SAME...";
+
+}
+
+else{
+
+stage.innerHTML = `
+<h2>Thank you for these beautiful memories ❤️</h2>
+<p>Our story continues...</p>
+`;
+
+}
+
+};
+
+}
+
+</script>
 </body>
 </html>
+
